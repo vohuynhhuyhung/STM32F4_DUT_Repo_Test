@@ -1,0 +1,4 @@
+{
+  "tests_dir": "hil_tests",
+  "hex": "STM32F4_DUT/Debug/STM32F4_DUT.hex"
+}
