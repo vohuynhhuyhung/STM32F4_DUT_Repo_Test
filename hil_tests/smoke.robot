@@ -3,7 +3,7 @@
 Resource    ${HIL_ROOT}/HIL_robot/resources/HIL_keywords.robot
 Resource    ${HIL_ROOT}/HIL_robot/user_resources/DUT_keywords.robot
 
-Suite Setup         Run Keywords    Connect To HIL    AND    HIL Power DUT On    AND    Connect To DUT
+Suite Setup         Run Keywords    Connect To HIL    AND    HIL Power DUT On    AND    Wait Until Keyword Succeeds    30s    2s    Connect To DUT
 Suite Teardown      Run Keywords    Disconnect from DUT    AND    Disconnect from HIL
 
 *** Test Cases ***
