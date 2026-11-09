@@ -1,4 +1,4 @@
-*** Settings ***
+*** Settings  ***
 # HIL_ROOT is injected by the CI runner.
 Resource    ${HIL_ROOT}/HIL_robot/resources/HIL_keywords.robot
 Resource    ${HIL_ROOT}/HIL_robot/user_resources/DUT_keywords.robot
