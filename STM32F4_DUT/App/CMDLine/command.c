@@ -80,6 +80,7 @@ tCmdLineEntry g_psCmdTable[] =
 	{ "w25q_erasechip", Cmd_EraseChip_W25Q, "Erase entire W25Q chip | format: w25q_erasechip" },
 
 	{ "i2c_scan",     Cmd_I2C_Scan,     "Scan I2C device active on bus" },
+	{ "i2c_tx",       Cmd_I2C_Tx,       "Send test bytes to 0x42 | format: i2c_tx <len> [start]" },
 	{ "eeprom_init",  Cmd_EEPROM_Init,  "eeprom_init <addr7bit> <size> <page>" },
 	{ "eeprom_write", Cmd_EEPROM_Write, "eeprom_write <addr> <len>" },
 	{ "eeprom_read",  Cmd_EEPROM_Read,  "eeprom_read <addr> <len>" },
@@ -605,6 +606,39 @@ int Cmd_I2C_Scan(int argc, char *argv[])
 		Console_Write(msg);
 	}
 
+	return CMDLINE_OK;
+}
+
+/* Send a test pattern to the fixed HIL test address (the Pico emulates a slave there and ACKs).
+ * format: i2c_tx <len> [start]   -> bytes start, start+1, ... (len 1..64, start 0..255, default 0)
+ */
+#define I2C_TEST_ADDR      0x42
+#define I2C_TEST_MAX_LEN   64
+
+int Cmd_I2C_Tx(int argc, char *argv[])
+{
+	if (argc < 3)
+		return CMDLINE_TOO_FEW_ARGS;
+	if (argc > 4)
+		return CMDLINE_TOO_MANY_ARGS;
+
+	int len   = atoi(argv[1]);
+	int start = (argc == 4) ? (int)strtol(argv[2], NULL, 0) : 0;
+
+	if (len < 1 || len > I2C_TEST_MAX_LEN || start < 0 || start > 0xFF)
+		return CMDLINE_INVALID_ARG;
+
+	uint8_t buf[I2C_TEST_MAX_LEN];
+	for (int i = 0; i < len; i++)
+		buf[i] = (uint8_t)(start + i);
+
+	if (HAL_I2C_Master_Transmit(&hi2c3, I2C_TEST_ADDR << 1, buf, (uint16_t)len, 100) != HAL_OK) {
+		Console_Write("\r\nI2C TX FAIL addr=0x%02X err=0x%02lX\r\n",
+		              I2C_TEST_ADDR, (unsigned long)HAL_I2C_GetError(&hi2c3));
+		return CMDLINE_OK;
+	}
+
+	Console_Write("\r\nI2C TX OK addr=0x%02X len=%d\r\n", I2C_TEST_ADDR, len);
 	return CMDLINE_OK;
 }
 
