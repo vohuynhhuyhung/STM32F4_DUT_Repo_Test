@@ -1,7 +1,7 @@
 *** Settings ***
-Documentation     DUT USART1 TX -> Pico UART receiver (GP21, protocol analyzer).
-...               The Pico receives every byte the DUT sends, with line errors (framing, parity,
-...               break, overrun). DUT commands: uart_tx <text>, uart_dump (bytes 00..FF), 115200 8N1.
+# Documentation     DUT USART1 TX -> Pico UART receiver (GP21, protocol analyzer).
+# ...               The Pico receives every byte the DUT sends, with line errors (framing, parity,
+# ...               break, overrun). DUT commands: uart_tx <text>, uart_dump (bytes 00..FF), 115200 8N1.
 # HIL_ROOT is injected by the CI runner.
 Resource          ${HIL_ROOT}/HIL_robot/resources/HIL_keywords.robot
 Resource          ${HIL_ROOT}/HIL_robot/user_resources/DUT_keywords.robot
