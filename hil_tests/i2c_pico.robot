@@ -1,7 +1,7 @@
 *** Settings ***
-Documentation     DUT I2C3 master -> Pico I2C slave (GP0=SDA, GP1=SCL).
-...               The Pico ACKs address 0x42 and logs every byte it receives.
-...               DUT command: i2c_tx <len> [start] sends start, start+1, ... to 0x42.
+# Documentation     DUT I2C3 master -> Pico I2C slave (GP0=SDA, GP1=SCL).
+# ...               The Pico ACKs address 0x42 and logs every byte it receives.
+# ...               DUT command: i2c_tx <len> [start] sends start, start+1, ... to 0x42.
 # HIL_ROOT is injected by the CI runner.
 Resource          ${HIL_ROOT}/HIL_robot/resources/HIL_keywords.robot
 Resource          ${HIL_ROOT}/HIL_robot/user_resources/DUT_keywords.robot
