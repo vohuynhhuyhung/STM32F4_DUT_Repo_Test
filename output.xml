@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<robot generator="Robot 7.5.1 (Python 3.13.17 on win32)" generated="2026-11-13T11:36:51.462873" rpa="false" schemaversion="5">
+<suite id="s1" name="Spi Device Pico" source="D:\HCMUT\DA2\STM32F4_DUT_Repo_Test\hil_tests\spi_device_pico.robot">
+<kw name="Run Keywords" owner="BuiltIn" type="SETUP">
+<kw name="Connect To HIL">
+<msg time="2026-11-13T11:36:51.516755" level="FAIL">No keyword with name 'Connect To HIL' found.</msg>
+<status status="FAIL" start="2026-11-13T11:36:51.516642" elapsed="0.000173">No keyword with name 'Connect To HIL' found.</status>
+</kw>
+<arg>Connect To HIL</arg>
+<arg>AND</arg>
+<arg>HIL Power DUT On</arg>
+<arg>AND</arg>
+<arg>Wait Until Keyword Succeeds</arg>
+<arg>30s</arg>
+<arg>2s</arg>
+<arg>Connect To DUT</arg>
+<arg>AND</arg>
+<arg>Connect To Logic Analyzer</arg>
+<doc>Executes all the given keywords in a sequence.</doc>
+<status status="FAIL" start="2026-11-13T11:36:51.514966" elapsed="0.001945">No keyword with name 'Connect To HIL' found.</status>
+</kw>
+<test id="s1-t1" name="DUT Reads Device ID" line="27">
+<status status="FAIL" start="2026-11-13T11:36:51.517199" elapsed="0.000904">Parent suite setup failed:
+No keyword with name 'Connect To HIL' found.</status>
+</test>
+<test id="s1-t2" name="Read Command On The Wire" line="31">
+<doc>Reading register 0 = MOSI 80 00 (read bit + address, then a dummy byte);
+the device answers the ID in the second byte.</doc>
+<status status="FAIL" start="2026-11-13T11:36:51.518532" elapsed="0.001163">Parent suite setup failed:
+No keyword with name 'Connect To HIL' found.</status>
+</test>
+<test id="s1-t3" name="DUT Configures The Device" line="37">
+<status status="FAIL" start="2026-11-13T11:36:51.520272" elapsed="0.000435">Parent suite setup failed:
+No keyword with name 'Connect To HIL' found.</status>
+</test>
+<test id="s1-t4" name="DUT Reads Live Sensor Data" line="42">
+<doc>The test changes the measurement registers; the DUT must read the new values each time.</doc>
+<status status="FAIL" start="2026-11-13T11:36:51.521069" elapsed="0.000501">Parent suite setup failed:
+No keyword with name 'Connect To HIL' found.</status>
+</test>
+<test id="s1-t5" name="DUT Burst Writes Consecutive Registers" line="51">
+<status status="FAIL" start="2026-11-13T11:36:51.522035" elapsed="0.000571">Parent suite setup failed:
+No keyword with name 'Connect To HIL' found.</status>
+</test>
+<test id="s1-t6" name="DUT Burst Reads The Whole Map" line="55">
+<doc>16-byte read with auto-increment: the device must keep up with the clock.</doc>
+<status status="FAIL" start="2026-11-13T11:36:51.523084" elapsed="0.000580">Parent suite setup failed:
+No keyword with name 'Connect To HIL' found.</status>
+</test>
+<kw name="Run Keywords" owner="BuiltIn" type="TEARDOWN">
+<kw name="Run Keyword And Ignore Error" owner="BuiltIn">
+<kw name="Pico SPI Device Stop">
+<msg time="2026-11-13T11:36:51.525512" level="FAIL">No keyword with name 'Pico SPI Device Stop' found.</msg>
+<status status="FAIL" start="2026-11-13T11:36:51.525474" elapsed="0.000080">No keyword with name 'Pico SPI Device Stop' found.</status>
+</kw>
+<arg>Pico SPI Device Stop</arg>
+<doc>Runs the given keyword with the given arguments and ignores possible errorw.</doc>
+<status status="PASS" start="2026-11-13T11:36:51.524683" elapsed="0.000930"/>
+</kw>
+<kw name="Disconnect from Logic Analyzer">
+<msg time="2026-11-13T11:36:51.526118" level="FAIL">No keyword with name 'Disconnect from Logic Analyzer' found.</msg>
+<status status="FAIL" start="2026-11-13T11:36:51.526099" elapsed="0.000042">No keyword with name 'Disconnect from Logic Analyzer' found.</status>
+</kw>
+<kw name="Disconnect from DUT">
+<msg time="2026-11-13T11:36:51.526688" level="FAIL">No keyword with name 'Disconnect from DUT' found.</msg>
+<status status="FAIL" start="2026-11-13T11:36:51.526672" elapsed="0.000037">No keyword with name 'Disconnect from DUT' found.</status>
+</kw>
+<kw name="Disconnect from HIL">
+<msg time="2026-11-13T11:36:51.527265" level="FAIL">No keyword with name 'Disconnect from HIL' found.</msg>
+<status status="FAIL" start="2026-11-13T11:36:51.527249" elapsed="0.000039">No keyword with name 'Disconnect from HIL' found.</status>
+</kw>
+<arg>Run Keyword And Ignore Error</arg>
+<arg>Pico SPI Device Stop</arg>
+<arg>AND</arg>
+<arg>Disconnect from Logic Analyzer</arg>
+<arg>AND</arg>
+<arg>Disconnect from DUT</arg>
+<arg>AND</arg>
+<arg>Disconnect from HIL</arg>
+<doc>Executes all the given keywords in a sequence.</doc>
+<status status="FAIL" start="2026-11-13T11:36:51.524241" elapsed="0.003110">Several failures occurred:
+
+1) No keyword with name 'Disconnect from Logic Analyzer' found.
+
+2) No keyword with name 'Disconnect from DUT' found.
+
+3) No keyword with name 'Disconnect from HIL' found.</status>
+</kw>
+<status status="FAIL" start="2026-11-13T11:36:51.464574" elapsed="0.062840">Suite setup failed:
+No keyword with name 'Connect To HIL' found.
+
+Also suite teardown failed:
+Several failures occurred:
+
+1) No keyword with name 'Disconnect from Logic Analyzer' found.
+
+2) No keyword with name 'Disconnect from DUT' found.
+
+3) No keyword with name 'Disconnect from HIL' found.</status>
+</suite>
+<statistics>
+<total>
+<stat pass="0" fail="6" skip="0">All Tests</stat>
+</total>
+<tag>
+</tag>
+<suite>
+<stat name="Spi Device Pico" id="s1" pass="0" fail="6" skip="0">Spi Device Pico</stat>
+</suite>
+</statistics>
+<errors>
+<msg time="2026-11-13T11:36:51.506997" level="ERROR">Error in file 'D:\HCMUT\DA2\STM32F4_DUT_Repo_Test\hil_tests\spi_device_pico.robot' on line 11: Replacing variables from setting 'Resource' failed: Variable '${HIL_ROOT}' not found.</msg>
+<msg time="2026-11-13T11:36:51.507343" level="ERROR">Error in file 'D:\HCMUT\DA2\STM32F4_DUT_Repo_Test\hil_tests\spi_device_pico.robot' on line 12: Replacing variables from setting 'Resource' failed: Variable '${HIL_ROOT}' not found.</msg>
+</errors>
+</robot>

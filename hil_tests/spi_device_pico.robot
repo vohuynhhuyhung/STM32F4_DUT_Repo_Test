@@ -1,4 +1,4 @@
-*** Settings ***
+*** Settings  ***
 # The Pico emulates a small SPI sensor with 16 registers, the DUT is the SPI3 master (mode 1).
 # Frame: first byte = R/W bit (bit 7, 1 = read) + register address, then data (auto-increment).
 # The DUT talks to it like to a real device with its generic commands:
