@@ -81,6 +81,8 @@ tCmdLineEntry g_psCmdTable[] =
 
 	{ "i2c_scan",     Cmd_I2C_Scan,     "Scan I2C device active on bus" },
 	{ "i2c_tx",       Cmd_I2C_Tx,       "Send test bytes to 0x42 | format: i2c_tx <len> [start]" },
+	{ "i2c_wr",       Cmd_I2C_Reg_Write, "Write registers | format: i2c_wr <addr> <reg> <b1> [..b5]" },
+	{ "i2c_rd",       Cmd_I2C_Reg_Read,  "Read registers | format: i2c_rd <addr> <reg> <len 1..16>" },
 	{ "eeprom_init",  Cmd_EEPROM_Init,  "eeprom_init <addr7bit> <size> <page>" },
 	{ "eeprom_write", Cmd_EEPROM_Write, "eeprom_write <addr> <len>" },
 	{ "eeprom_read",  Cmd_EEPROM_Read,  "eeprom_read <addr> <len>" },
@@ -639,6 +641,71 @@ int Cmd_I2C_Tx(int argc, char *argv[])
 	}
 
 	Console_Write("\r\nI2C TX OK addr=0x%02X len=%d\r\n", I2C_TEST_ADDR, len);
+	return CMDLINE_OK;
+}
+
+/* Generic register access to any I2C device with an 8-bit register pointer (like i2cset/i2cget).
+ * i2c_wr <addr> <reg> <b1> [b2..b5]   -> one write: [reg] [b1] [b2] ...
+ * i2c_rd <addr> <reg> <len>           -> write [reg], repeated START, read len bytes (len 1..16)
+ * Numbers accept decimal or 0x hex.
+ */
+#define I2C_REG_MAX_LEN 16
+
+static int parse_byte(const char *s, uint8_t *out)
+{
+	char *end;
+	long v = strtol(s, &end, 0);
+	if (*end != '\0' || v < 0 || v > 0xFF)
+		return 0;
+	*out = (uint8_t)v;
+	return 1;
+}
+
+int Cmd_I2C_Reg_Write(int argc, char *argv[])
+{
+	/* argc = tokens + 1: "i2c_wr addr reg b1" -> 5 */
+	if (argc < 5)
+		return CMDLINE_TOO_FEW_ARGS;
+
+	uint8_t addr, reg, buf[I2C_REG_MAX_LEN];
+	int n = argc - 4;   /* number of data bytes */
+	if (!parse_byte(argv[1], &addr) || addr < 0x08 || addr > 0x77 || !parse_byte(argv[2], &reg))
+		return CMDLINE_INVALID_ARG;
+	for (int i = 0; i < n; i++) {
+		if (!parse_byte(argv[3 + i], &buf[i]))
+			return CMDLINE_INVALID_ARG;
+	}
+
+	if (HAL_I2C_Mem_Write(&hi2c3, addr << 1, reg, I2C_MEMADD_SIZE_8BIT, buf, (uint16_t)n, 100) != HAL_OK) {
+		Console_Write("\r\nI2C WR FAIL addr=0x%02X err=0x%02lX\r\n",
+		              addr, (unsigned long)HAL_I2C_GetError(&hi2c3));
+		return CMDLINE_OK;
+	}
+	Console_Write("\r\nI2C WR OK addr=0x%02X reg=0x%02X len=%d\r\n", addr, reg, n);
+	return CMDLINE_OK;
+}
+
+int Cmd_I2C_Reg_Read(int argc, char *argv[])
+{
+	if (argc < 5)
+		return CMDLINE_TOO_FEW_ARGS;
+	if (argc > 5)
+		return CMDLINE_TOO_MANY_ARGS;
+
+	uint8_t addr, reg, len, buf[I2C_REG_MAX_LEN];
+	if (!parse_byte(argv[1], &addr) || addr < 0x08 || addr > 0x77 || !parse_byte(argv[2], &reg)
+	    || !parse_byte(argv[3], &len) || len < 1 || len > I2C_REG_MAX_LEN)
+		return CMDLINE_INVALID_ARG;
+
+	if (HAL_I2C_Mem_Read(&hi2c3, addr << 1, reg, I2C_MEMADD_SIZE_8BIT, buf, len, 100) != HAL_OK) {
+		Console_Write("\r\nI2C RD FAIL addr=0x%02X err=0x%02lX\r\n",
+		              addr, (unsigned long)HAL_I2C_GetError(&hi2c3));
+		return CMDLINE_OK;
+	}
+	Console_Write("\r\nI2C RD addr=0x%02X reg=0x%02X:", addr, reg);
+	for (int i = 0; i < len; i++)
+		Console_Write(" %02X", buf[i]);
+	Console_Write("\r\n");
 	return CMDLINE_OK;
 }
 

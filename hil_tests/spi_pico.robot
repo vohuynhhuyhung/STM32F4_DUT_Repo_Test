@@ -1,10 +1,10 @@
 *** Settings ***
-Documentation     DUT SPI3 master -> Pico (protocol analyzer + slave), no other slave on the bus.
-...               The Pico captures every CS frame (MOSI and MISO) and answers on MISO with 0x00
-...               (W25Q status 0x00 = "not busy", so the DUT flash driver never hangs).
-...               Wiring: DUT PC10 (SCK) -> GP10, PC12 (MOSI) -> GP11, PC11 (MISO) -> GP12,
-...               PD0 (CS) -> GP13. NOTE: the DUT J3 silkscreen swaps SCK/MOSI: use the PC pin names.
-...               DUT SPI3 is mode 1 (CPOL 0, CPHA 1).
+# Documentation     DUT SPI3 master -> Pico (protocol analyzer + slave), no other slave on the bus.
+# ...               The Pico captures every CS frame (MOSI and MISO) and answers on MISO with 0x00
+# ...               (W25Q status 0x00 = "not busy", so the DUT flash driver never hangs).
+# ...               Wiring: DUT PC10 (SCK) -> GP10, PC12 (MOSI) -> GP11, PC11 (MISO) -> GP12,
+# ...               PD0 (CS) -> GP13. NOTE: the DUT J3 silkscreen swaps SCK/MOSI: use the PC pin names.
+# ...               DUT SPI3 is mode 1 (CPOL 0, CPHA 1).
 # HIL_ROOT is injected by the CI runner.
 Resource          ${HIL_ROOT}/HIL_robot/resources/HIL_keywords.robot
 Resource          ${HIL_ROOT}/HIL_robot/user_resources/DUT_keywords.robot
