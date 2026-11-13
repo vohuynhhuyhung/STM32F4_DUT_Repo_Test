@@ -39,6 +39,8 @@ int Cmd_I2C_Scan(int argc, char *argv[]);
 int Cmd_I2C_Tx(int argc, char *argv[]);
 int Cmd_I2C_Reg_Write(int argc, char *argv[]);
 int Cmd_I2C_Reg_Read(int argc, char *argv[]);
+int Cmd_SPI_Reg_Write(int argc, char *argv[]);
+int Cmd_SPI_Reg_Read(int argc, char *argv[]);
 int Cmd_set_freq(int argc, char *argv[]);
 int Cmd_get_freq(int argc, char *argv[]);
 int Cmd_Sine_Wave(int argc, char *argv[]);

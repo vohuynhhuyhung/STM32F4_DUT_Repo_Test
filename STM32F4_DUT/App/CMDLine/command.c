@@ -83,6 +83,8 @@ tCmdLineEntry g_psCmdTable[] =
 	{ "i2c_tx",       Cmd_I2C_Tx,       "Send test bytes to 0x42 | format: i2c_tx <len> [start]" },
 	{ "i2c_wr",       Cmd_I2C_Reg_Write, "Write registers | format: i2c_wr <addr> <reg> <b1> [..b5]" },
 	{ "i2c_rd",       Cmd_I2C_Reg_Read,  "Read registers | format: i2c_rd <addr> <reg> <len 1..16>" },
+	{ "spi_wr",       Cmd_SPI_Reg_Write, "Write SPI registers (CS PD0) | format: spi_wr <reg> <b1> [..b6]" },
+	{ "spi_rd",       Cmd_SPI_Reg_Read,  "Read SPI registers (CS PD0) | format: spi_rd <reg> <len 1..16>" },
 	{ "eeprom_init",  Cmd_EEPROM_Init,  "eeprom_init <addr7bit> <size> <page>" },
 	{ "eeprom_write", Cmd_EEPROM_Write, "eeprom_write <addr> <len>" },
 	{ "eeprom_read",  Cmd_EEPROM_Read,  "eeprom_read <addr> <len>" },
@@ -703,6 +705,71 @@ int Cmd_I2C_Reg_Read(int argc, char *argv[])
 		return CMDLINE_OK;
 	}
 	Console_Write("\r\nI2C RD addr=0x%02X reg=0x%02X:", addr, reg);
+	for (int i = 0; i < len; i++)
+		Console_Write(" %02X", buf[i]);
+	Console_Write("\r\n");
+	return CMDLINE_OK;
+}
+
+/* Generic register access to an SPI device on SPI3 with CS on PD0 (the W25Q CS line),
+ * using the common sensor protocol: first byte = R/W bit (bit 7, 1 = read) + register address.
+ * spi_wr <reg> <b1> [b2..b6]   -> CS low, [reg & 0x7F] [b1] [b2] ..., CS high
+ * spi_rd <reg> <len 1..16>     -> CS low, [reg | 0x80] then len dummy 0x00 bytes, CS high
+ */
+#define SPI_REG_MAX_LEN 16
+
+static uint8_t spi3_xfer(uint8_t tx)
+{
+	while (!LL_SPI_IsActiveFlag_TXE(SPI3)) ;
+	LL_SPI_TransmitData8(SPI3, tx);
+	while (!LL_SPI_IsActiveFlag_RXNE(SPI3)) ;
+	return LL_SPI_ReceiveData8(SPI3);
+}
+
+int Cmd_SPI_Reg_Write(int argc, char *argv[])
+{
+	/* argc = tokens + 1: "spi_wr reg b1" -> 4 */
+	if (argc < 4)
+		return CMDLINE_TOO_FEW_ARGS;
+
+	uint8_t reg, buf[SPI_REG_MAX_LEN];
+	int n = argc - 3;   /* number of data bytes */
+	if (!parse_byte(argv[1], &reg) || reg > 0x7F)
+		return CMDLINE_INVALID_ARG;
+	for (int i = 0; i < n; i++) {
+		if (!parse_byte(argv[2 + i], &buf[i]))
+			return CMDLINE_INVALID_ARG;
+	}
+
+	LL_GPIO_ResetOutputPin(GPIOD, LL_GPIO_PIN_0);   /* CS low */
+	spi3_xfer(reg & 0x7F);
+	for (int i = 0; i < n; i++)
+		spi3_xfer(buf[i]);
+	LL_GPIO_SetOutputPin(GPIOD, LL_GPIO_PIN_0);     /* CS high */
+
+	Console_Write("\r\nSPI WR OK reg=0x%02X len=%d\r\n", reg, n);
+	return CMDLINE_OK;
+}
+
+int Cmd_SPI_Reg_Read(int argc, char *argv[])
+{
+	if (argc < 4)
+		return CMDLINE_TOO_FEW_ARGS;
+	if (argc > 4)
+		return CMDLINE_TOO_MANY_ARGS;
+
+	uint8_t reg, len, buf[SPI_REG_MAX_LEN];
+	if (!parse_byte(argv[1], &reg) || reg > 0x7F || !parse_byte(argv[2], &len)
+	    || len < 1 || len > SPI_REG_MAX_LEN)
+		return CMDLINE_INVALID_ARG;
+
+	LL_GPIO_ResetOutputPin(GPIOD, LL_GPIO_PIN_0);   /* CS low */
+	spi3_xfer(reg | 0x80);
+	for (int i = 0; i < len; i++)
+		buf[i] = spi3_xfer(0x00);
+	LL_GPIO_SetOutputPin(GPIOD, LL_GPIO_PIN_0);     /* CS high */
+
+	Console_Write("\r\nSPI RD reg=0x%02X:", reg);
 	for (int i = 0; i < len; i++)
 		Console_Write(" %02X", buf[i]);
 	Console_Write("\r\n");
