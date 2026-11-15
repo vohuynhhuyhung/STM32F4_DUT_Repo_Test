@@ -85,6 +85,8 @@ tCmdLineEntry g_psCmdTable[] =
 	{ "i2c_rd",       Cmd_I2C_Reg_Read,  "Read registers | format: i2c_rd <addr> <reg> <len 1..16>" },
 	{ "spi_wr",       Cmd_SPI_Reg_Write, "Write SPI registers (CS PD0) | format: spi_wr <reg> <b1> [..b6]" },
 	{ "spi_rd",       Cmd_SPI_Reg_Read,  "Read SPI registers (CS PD0) | format: spi_rd <reg> <len 1..16>" },
+	{ "ee_wr",        Cmd_EE_Write,      "SPI EEPROM 25LC020A write (CS PD0) | format: ee_wr <addr> <b1> [..b6]" },
+	{ "ee_rd",        Cmd_EE_Read,       "SPI EEPROM 25LC020A read (CS PD0) | format: ee_rd <addr> <len 1..16>" },
 	{ "eeprom_init",  Cmd_EEPROM_Init,  "eeprom_init <addr7bit> <size> <page>" },
 	{ "eeprom_write", Cmd_EEPROM_Write, "eeprom_write <addr> <len>" },
 	{ "eeprom_read",  Cmd_EEPROM_Read,  "eeprom_read <addr> <len>" },
@@ -770,6 +772,121 @@ int Cmd_SPI_Reg_Read(int argc, char *argv[])
 	LL_GPIO_SetOutputPin(GPIOD, LL_GPIO_PIN_0);     /* CS high */
 
 	Console_Write("\r\nSPI RD reg=0x%02X:", reg);
+	for (int i = 0; i < len; i++)
+		Console_Write(" %02X", buf[i]);
+	Console_Write("\r\n");
+	return CMDLINE_OK;
+}
+
+/* Small driver for a 25LC020A-style SPI EEPROM (256 bytes, 16-byte pages) on SPI3, CS PD0.
+ * ee_wr <addr> <b1> [..b6]   -> WREN, WRITE split at page boundaries, wait for WIP = 0 after each page
+ * ee_rd <addr> <len 1..16>   -> READ 03 <addr>, then len bytes
+ */
+#define EE_CMD_WREN  0x06
+#define EE_CMD_RDSR  0x05
+#define EE_CMD_READ  0x03
+#define EE_CMD_WRITE 0x02
+#define EE_SR_WIP    0x01
+#define EE_SR_WEL    0x02
+#define EE_PAGE_SIZE 16
+#define EE_WIP_TIMEOUT_MS 20
+
+static inline void ee_cs_low(void)  { LL_GPIO_ResetOutputPin(GPIOD, LL_GPIO_PIN_0); }
+static inline void ee_cs_high(void) { LL_GPIO_SetOutputPin(GPIOD, LL_GPIO_PIN_0); }
+
+static uint8_t ee_read_status(void)
+{
+	ee_cs_low();
+	spi3_xfer(EE_CMD_RDSR);
+	uint8_t sr = spi3_xfer(0x00);
+	ee_cs_high();
+	return sr;
+}
+
+/* 1 = ready, 0 = still busy after the timeout */
+static int ee_wait_ready(void)
+{
+	uint32_t t0 = HAL_GetTick();
+	while (ee_read_status() & EE_SR_WIP) {
+		if (HAL_GetTick() - t0 > EE_WIP_TIMEOUT_MS)
+			return 0;
+	}
+	return 1;
+}
+
+int Cmd_EE_Write(int argc, char *argv[])
+{
+	/* argc = tokens + 1: "ee_wr addr b1" -> 4 */
+	if (argc < 4)
+		return CMDLINE_TOO_FEW_ARGS;
+
+	uint8_t addr, buf[SPI_REG_MAX_LEN];
+	int n = argc - 3;   /* number of data bytes */
+	if (!parse_byte(argv[1], &addr))
+		return CMDLINE_INVALID_ARG;
+	for (int i = 0; i < n; i++) {
+		if (!parse_byte(argv[2 + i], &buf[i]))
+			return CMDLINE_INVALID_ARG;
+	}
+
+	int done = 0, pages = 0;
+	while (done < n) {
+		uint8_t a = (uint8_t)(addr + done);
+		int chunk = EE_PAGE_SIZE - (a % EE_PAGE_SIZE);   /* never cross a page boundary */
+		if (chunk > n - done)
+			chunk = n - done;
+
+		if (!ee_wait_ready()) {
+			Console_Write("\r\nEE WR FAIL busy addr=0x%02X\r\n", a);
+			return CMDLINE_OK;
+		}
+		ee_cs_low();
+		spi3_xfer(EE_CMD_WREN);
+		ee_cs_high();
+		if (!(ee_read_status() & EE_SR_WEL)) {
+			Console_Write("\r\nEE WR FAIL no WEL addr=0x%02X\r\n", a);
+			return CMDLINE_OK;
+		}
+		ee_cs_low();
+		spi3_xfer(EE_CMD_WRITE);
+		spi3_xfer(a);
+		for (int i = 0; i < chunk; i++)
+			spi3_xfer(buf[done + i]);
+		ee_cs_high();
+		if (!ee_wait_ready()) {
+			Console_Write("\r\nEE WR FAIL timeout addr=0x%02X\r\n", a);
+			return CMDLINE_OK;
+		}
+		done += chunk;
+		pages++;
+	}
+	Console_Write("\r\nEE WR OK addr=0x%02X len=%d pages=%d\r\n", addr, n, pages);
+	return CMDLINE_OK;
+}
+
+int Cmd_EE_Read(int argc, char *argv[])
+{
+	if (argc < 4)
+		return CMDLINE_TOO_FEW_ARGS;
+	if (argc > 4)
+		return CMDLINE_TOO_MANY_ARGS;
+
+	uint8_t addr, len, buf[SPI_REG_MAX_LEN];
+	if (!parse_byte(argv[1], &addr) || !parse_byte(argv[2], &len) || len < 1 || len > SPI_REG_MAX_LEN)
+		return CMDLINE_INVALID_ARG;
+
+	if (!ee_wait_ready()) {
+		Console_Write("\r\nEE RD FAIL busy\r\n");
+		return CMDLINE_OK;
+	}
+	ee_cs_low();
+	spi3_xfer(EE_CMD_READ);
+	spi3_xfer(addr);
+	for (int i = 0; i < len; i++)
+		buf[i] = spi3_xfer(0x00);
+	ee_cs_high();
+
+	Console_Write("\r\nEE RD addr=0x%02X:", addr);
 	for (int i = 0; i < len; i++)
 		Console_Write(" %02X", buf[i]);
 	Console_Write("\r\n");
