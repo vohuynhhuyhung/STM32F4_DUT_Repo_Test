@@ -1,10 +1,57 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<robot generator="Robot 7.5.1 (Python 3.13.17 on win32)" generated="2026-11-13T11:36:51.462873" rpa="false" schemaversion="5">
-<suite id="s1" name="Spi Device Pico" source="D:\HCMUT\DA2\STM32F4_DUT_Repo_Test\hil_tests\spi_device_pico.robot">
+<robot generator="Robot 7.5.1 (Python 3.13.17 on win32)" generated="2026-11-15T20:57:25.084372" rpa="false" schemaversion="5">
+<suite id="s1" name="Rtc Ds3231 Pico" source="D:\HCMUT\DA2\STM32F4_DUT_Repo_Test\hil_tests\rtc_ds3231_pico.robot">
 <kw name="Run Keywords" owner="BuiltIn" type="SETUP">
-<kw name="Connect To HIL">
-<msg time="2026-11-13T11:36:51.516755" level="FAIL">No keyword with name 'Connect To HIL' found.</msg>
-<status status="FAIL" start="2026-11-13T11:36:51.516642" elapsed="0.000173">No keyword with name 'Connect To HIL' found.</status>
+<kw name="Connect To HIL" owner="HIL_keywords">
+<kw name="Connect HIL" owner="hil_lib">
+<msg time="2026-11-15T20:57:25.720673" level="INFO">Connected HIL at COM6, baud 921600</msg>
+<arg>${HIL_PORT}</arg>
+<arg>${HIL_BAUDRATE}</arg>
+<doc>Connect to HIL serial</doc>
+<status status="PASS" start="2026-11-15T20:57:25.218055" elapsed="0.502791"/>
+</kw>
+<status status="PASS" start="2026-11-15T20:57:25.217928" elapsed="0.503074"/>
+</kw>
+<kw name="HIL Power DUT On" owner="hil_lib">
+<msg time="2026-11-15T20:57:26.322999" level="INFO">dut_power 1
+DUT is powered ON
+
+OK</msg>
+<status status="PASS" start="2026-11-15T20:57:25.721218" elapsed="0.606164"/>
+</kw>
+<kw name="Wait Until Keyword Succeeds" owner="BuiltIn">
+<kw name="Connect To DUT" owner="DUT_keywords">
+<kw name="Connect DUT" owner="dut_lib">
+<arg>${DUT_PORT}</arg>
+<arg>${DUT_BAUDRATE}</arg>
+<status status="PASS" start="2026-11-15T20:57:26.328092" elapsed="0.502863"/>
+</kw>
+<status status="PASS" start="2026-11-15T20:57:26.327959" elapsed="0.503080"/>
+</kw>
+<arg>30s</arg>
+<arg>2s</arg>
+<arg>Connect To DUT</arg>
+<doc>Runs the specified keyword and retries if it fails.</doc>
+<status status="PASS" start="2026-11-15T20:57:26.327558" elapsed="0.503508"/>
+</kw>
+<kw name="Connect To Logic Analyzer" owner="HIL_keywords">
+<kw name="Connect Logic Analyzer" owner="logic_analyzer_lib">
+<arg>${LOG_PORT}</arg>
+<status status="PASS" start="2026-11-15T20:57:26.831336" elapsed="0.503282"/>
+</kw>
+<status status="PASS" start="2026-11-15T20:57:26.831218" elapsed="0.503478"/>
+</kw>
+<kw name="Pico RTC Start" owner="logic_analyzer_lib">
+<msg time="2026-11-15T20:57:27.335839" level="INFO">Pico I2C slave enabled at 0x68</msg>
+<doc>Start the emulated DS3231 at 0x68. `reset=True` loads the power-on time 2000-01-01 00:00:00.</doc>
+<status status="PASS" start="2026-11-15T20:57:27.334802" elapsed="0.001089"/>
+</kw>
+<kw name="DUT Init RTC" owner="dut_lib">
+<msg time="2026-11-15T20:57:27.736863" level="INFO">rtc_init
+DS1307 init OK
+
+OK</msg>
+<status status="PASS" start="2026-11-15T20:57:27.335975" elapsed="0.400993"/>
 </kw>
 <arg>Connect To HIL</arg>
 <arg>AND</arg>
@@ -16,61 +63,237 @@
 <arg>Connect To DUT</arg>
 <arg>AND</arg>
 <arg>Connect To Logic Analyzer</arg>
+<arg>AND</arg>
+<arg>Pico RTC Start</arg>
+<arg>AND</arg>
+<arg>DUT Init RTC</arg>
 <doc>Executes all the given keywords in a sequence.</doc>
-<status status="FAIL" start="2026-11-13T11:36:51.514966" elapsed="0.001945">No keyword with name 'Connect To HIL' found.</status>
+<status status="PASS" start="2026-11-15T20:57:25.217333" elapsed="2.519679"/>
 </kw>
-<test id="s1-t1" name="DUT Reads Device ID" line="27">
-<status status="FAIL" start="2026-11-13T11:36:51.517199" elapsed="0.000904">Parent suite setup failed:
-No keyword with name 'Connect To HIL' found.</status>
+<test id="s1-t1" name="DUT Sets The Time" line="20">
+<kw name="Pico RTC Start" owner="logic_analyzer_lib" type="SETUP">
+<msg time="2026-11-15T20:57:27.738383" level="INFO">Pico I2C slave enabled at 0x68</msg>
+<arg>reset=True</arg>
+<doc>Start the emulated DS3231 at 0x68. `reset=True` loads the power-on time 2000-01-01 00:00:00.</doc>
+<status status="PASS" start="2026-11-15T20:57:27.737444" elapsed="0.001005"/>
+</kw>
+<kw name="DUT Set RTC Time" owner="dut_lib">
+<msg time="2026-11-15T20:57:28.340575" level="INFO">rtc_set_time 14 30 45DS1307 set time OK: 14:30:45
+
+OK</msg>
+<arg>hour=14</arg>
+<arg>minute=30</arg>
+<arg>second=45</arg>
+<status status="PASS" start="2026-11-15T20:57:27.738646" elapsed="0.602099"/>
+</kw>
+<kw name="Pico RTC Time Should Be" owner="logic_analyzer_lib">
+<msg time="2026-11-15T20:57:28.342146" level="INFO">Pico I2C registers: 00:45 01:30 02:14 03:01 04:01 05:01 06:00 07:00 08:00 09:00 0A:00 0B:00 0C:00 0D:00 0E:1C 0F:88 10:00 11:00 12:00</msg>
+<msg time="2026-11-15T20:57:28.342230" level="INFO">Pico RTC time: 2000-01-01 14:30:45 (day 1)</msg>
+<arg>2000-01-01 14:30:45</arg>
+<arg>tolerance=2</arg>
+<doc>The emulated RTC must show `expected` ("YYYY-MM-DD HH:MM:SS") within `tolerance` seconds.</doc>
+<status status="PASS" start="2026-11-15T20:57:28.341171" elapsed="0.008161"/>
+</kw>
+<status status="PASS" start="2026-11-15T20:57:27.737099" elapsed="0.612496"/>
 </test>
-<test id="s1-t2" name="Read Command On The Wire" line="31">
-<doc>Reading register 0 = MOSI 80 00 (read bit + address, then a dummy byte);
-the device answers the ID in the second byte.</doc>
-<status status="FAIL" start="2026-11-13T11:36:51.518532" elapsed="0.001163">Parent suite setup failed:
-No keyword with name 'Connect To HIL' found.</status>
+<test id="s1-t2" name="DUT Sets The Date" line="24">
+<kw name="Pico RTC Start" owner="logic_analyzer_lib" type="SETUP">
+<msg time="2026-11-15T20:57:28.351552" level="INFO">Pico I2C slave enabled at 0x68</msg>
+<arg>reset=True</arg>
+<doc>Start the emulated DS3231 at 0x68. `reset=True` loads the power-on time 2000-01-01 00:00:00.</doc>
+<status status="PASS" start="2026-11-15T20:57:28.350253" elapsed="0.001374"/>
+</kw>
+<kw name="DUT Set RTC Date" owner="dut_lib">
+<msg time="2026-11-15T20:57:28.954058" level="INFO">rtc_set_date 5 13 11 26DS1307 set date OK: DOW=5 13/11/2026
+
+OK</msg>
+<arg>dow=5</arg>
+<arg>date=13</arg>
+<arg>month=11</arg>
+<arg>year=26</arg>
+<status status="PASS" start="2026-11-15T20:57:28.351826" elapsed="0.602326"/>
+</kw>
+<kw name="Pico I2C Register Should Be" owner="logic_analyzer_lib">
+<msg time="2026-11-15T20:57:28.954987" level="INFO">Pico I2C registers: 00:00 01:00 02:00 03:05 04:13 05:11 06:26 07:00 08:00 09:00 0A:00 0B:00 0C:00 0D:00 0E:1C 0F:88 10:14 11:00 12:00</msg>
+<arg>0x03</arg>
+<arg>0x05</arg>
+<arg>0x13</arg>
+<arg>0x11</arg>
+<arg>0x26</arg>
+<doc>Register `reg` (and the following ones) must hold `expected`, e.g. `0x01    0x80`.</doc>
+<status status="PASS" start="2026-11-15T20:57:28.954432" elapsed="0.000616"/>
+</kw>
+<status status="PASS" start="2026-11-15T20:57:28.349898" elapsed="0.605332"/>
 </test>
-<test id="s1-t3" name="DUT Configures The Device" line="37">
-<status status="FAIL" start="2026-11-13T11:36:51.520272" elapsed="0.000435">Parent suite setup failed:
-No keyword with name 'Connect To HIL' found.</status>
+<test id="s1-t3" name="DUT Reads The Time" line="29">
+<kw name="Pico RTC Start" owner="logic_analyzer_lib" type="SETUP">
+<msg time="2026-11-15T20:57:28.957583" level="INFO">Pico I2C slave enabled at 0x68</msg>
+<arg>reset=True</arg>
+<doc>Start the emulated DS3231 at 0x68. `reset=True` loads the power-on time 2000-01-01 00:00:00.</doc>
+<status status="PASS" start="2026-11-15T20:57:28.955891" elapsed="0.001772"/>
+</kw>
+<kw name="Pico RTC Set Time" owner="logic_analyzer_lib">
+<msg time="2026-11-15T20:57:28.960393" level="INFO">Pico RTC set to 2026-11-13 08:15:00 (day 5)</msg>
+<arg>2026-11-13 08:15:00</arg>
+<arg>dow=5</arg>
+<doc>Set the emulated RTC, `when` = "YYYY-MM-DD HH:MM:SS" (2000..2099), `dow` = day 1..7.</doc>
+<status status="PASS" start="2026-11-15T20:57:28.957879" elapsed="0.002590"/>
+</kw>
+<kw name="DUT Get RTC Time" owner="dut_lib">
+<msg time="2026-11-15T20:57:29.362088" level="INFO">rtc_get_time
+DS1307 get time OK: 8:15:0
+
+OK</msg>
+<msg time="2026-11-15T20:57:29.362712" level="INFO">${time} = {'hour': 8, 'minute': 15, 'second': 0}</msg>
+<var>${time}</var>
+<status status="PASS" start="2026-11-15T20:57:28.960714" elapsed="0.402023"/>
+</kw>
+<kw name="RTC Time Should Be Within" owner="dut_lib">
+<arg>${time}</arg>
+<arg>8</arg>
+<arg>15</arg>
+<arg>0</arg>
+<arg>tolerance=1</arg>
+<status status="PASS" start="2026-11-15T20:57:29.362977" elapsed="0.000217"/>
+</kw>
+<status status="PASS" start="2026-11-15T20:57:28.955600" elapsed="0.407790"/>
 </test>
-<test id="s1-t4" name="DUT Reads Live Sensor Data" line="42">
-<doc>The test changes the measurement registers; the DUT must read the new values each time.</doc>
-<status status="FAIL" start="2026-11-13T11:36:51.521069" elapsed="0.000501">Parent suite setup failed:
-No keyword with name 'Connect To HIL' found.</status>
+<test id="s1-t4" name="Clock Is Running" line="34">
+<kw name="Pico RTC Start" owner="logic_analyzer_lib" type="SETUP">
+<msg time="2026-11-15T20:57:29.365220" level="INFO">Pico I2C slave enabled at 0x68</msg>
+<arg>reset=True</arg>
+<doc>Start the emulated DS3231 at 0x68. `reset=True` loads the power-on time 2000-01-01 00:00:00.</doc>
+<status status="PASS" start="2026-11-15T20:57:29.364150" elapsed="0.001116"/>
+</kw>
+<kw name="Pico RTC Set Time" owner="logic_analyzer_lib">
+<msg time="2026-11-15T20:57:29.367697" level="INFO">Pico RTC set to 2026-11-13 12:00:00 (day 1)</msg>
+<arg>2026-11-13 12:00:00</arg>
+<doc>Set the emulated RTC, `when` = "YYYY-MM-DD HH:MM:SS" (2000..2099), `dow` = day 1..7.</doc>
+<status status="PASS" start="2026-11-15T20:57:29.365452" elapsed="0.002284"/>
+</kw>
+<kw name="Sleep" owner="BuiltIn">
+<msg time="2026-11-15T20:57:32.368484" level="INFO">Slept 3 seconds.</msg>
+<arg>3s</arg>
+<doc>Pauses execution for the given time.</doc>
+<status status="PASS" start="2026-11-15T20:57:29.367966" elapsed="3.000594"/>
+</kw>
+<kw name="DUT Get RTC Time" owner="dut_lib">
+<msg time="2026-11-15T20:57:32.769941" level="INFO">rtc_get_time
+DS1307 get time OK: 12:0:3
+
+OK</msg>
+<msg time="2026-11-15T20:57:32.770170" level="INFO">${time} = {'hour': 12, 'minute': 0, 'second': 3}</msg>
+<var>${time}</var>
+<status status="PASS" start="2026-11-15T20:57:32.368850" elapsed="0.401352"/>
+</kw>
+<kw name="RTC Time Should Be Within" owner="dut_lib">
+<arg>${time}</arg>
+<arg>12</arg>
+<arg>0</arg>
+<arg>3</arg>
+<arg>tolerance=1</arg>
+<status status="PASS" start="2026-11-15T20:57:32.770512" elapsed="0.000401"/>
+</kw>
+<status status="PASS" start="2026-11-15T20:57:29.363797" elapsed="3.407391"/>
 </test>
-<test id="s1-t5" name="DUT Burst Writes Consecutive Registers" line="51">
-<status status="FAIL" start="2026-11-13T11:36:51.522035" elapsed="0.000571">Parent suite setup failed:
-No keyword with name 'Connect To HIL' found.</status>
-</test>
-<test id="s1-t6" name="DUT Burst Reads The Whole Map" line="55">
-<doc>16-byte read with auto-increment: the device must keep up with the clock.</doc>
-<status status="FAIL" start="2026-11-13T11:36:51.523084" elapsed="0.000580">Parent suite setup failed:
-No keyword with name 'Connect To HIL' found.</status>
+<test id="s1-t5" name="New Year Rollover" line="40">
+<kw name="Pico RTC Start" owner="logic_analyzer_lib" type="SETUP">
+<msg time="2026-11-15T20:57:32.773460" level="INFO">Pico I2C slave enabled at 0x68</msg>
+<arg>reset=True</arg>
+<doc>Start the emulated DS3231 at 0x68. `reset=True` loads the power-on time 2000-01-01 00:00:00.</doc>
+<status status="PASS" start="2026-11-15T20:57:32.772119" elapsed="0.001394"/>
+</kw>
+<kw name="DUT Set RTC Date" owner="dut_lib">
+<msg time="2026-11-15T20:57:33.375695" level="INFO">rtc_set_date 4 31 12 26DS1307 set date OK: DOW=4 31/12/2026
+
+OK</msg>
+<arg>dow=4</arg>
+<arg>date=31</arg>
+<arg>month=12</arg>
+<arg>year=26</arg>
+<status status="PASS" start="2026-11-15T20:57:32.773661" elapsed="0.602234"/>
+</kw>
+<kw name="DUT Set RTC Time" owner="dut_lib">
+<msg time="2026-11-15T20:57:33.978488" level="INFO">rtc_set_time 23 59 58DS1307 set time OK: 23:59:58
+
+OK</msg>
+<arg>hour=23</arg>
+<arg>minute=59</arg>
+<arg>second=58</arg>
+<status status="PASS" start="2026-11-15T20:57:33.376257" elapsed="0.602606"/>
+</kw>
+<kw name="Sleep" owner="BuiltIn">
+<msg time="2026-11-15T20:57:36.981558" level="INFO">Slept 3 seconds.</msg>
+<arg>3s</arg>
+<doc>Pauses execution for the given time.</doc>
+<status status="PASS" start="2026-11-15T20:57:33.980082" elapsed="3.001560"/>
+</kw>
+<kw name="DUT Get RTC Date" owner="dut_lib">
+<msg time="2026-11-15T20:57:37.382913" level="INFO">rtc_get_dateDS1307 get date OK: DOW=5 01/01/2027
+
+OK</msg>
+<msg time="2026-11-15T20:57:37.383264" level="INFO">${date} = {'dow': 5, 'date': 1, 'month': 1, 'year': 2027}</msg>
+<var>${date}</var>
+<status status="PASS" start="2026-11-15T20:57:36.981816" elapsed="0.401482"/>
+</kw>
+<kw name="RTC Date Should Be" owner="dut_lib">
+<arg>${date}</arg>
+<arg>dow=5</arg>
+<arg>date=1</arg>
+<arg>month=1</arg>
+<arg>year=27</arg>
+<status status="PASS" start="2026-11-15T20:57:37.383620" elapsed="0.000299"/>
+</kw>
+<kw name="DUT Get RTC Time" owner="dut_lib">
+<msg time="2026-11-15T20:57:37.785195" level="INFO">rtc_get_time
+DS1307 get time OK: 0:0:1
+
+OK</msg>
+<msg time="2026-11-15T20:57:37.785383" level="INFO">${time} = {'hour': 0, 'minute': 0, 'second': 1}</msg>
+<var>${time}</var>
+<status status="PASS" start="2026-11-15T20:57:37.384094" elapsed="0.401311"/>
+</kw>
+<kw name="RTC Time Should Be Within" owner="dut_lib">
+<arg>${time}</arg>
+<arg>0</arg>
+<arg>0</arg>
+<arg>1</arg>
+<arg>tolerance=2</arg>
+<status status="PASS" start="2026-11-15T20:57:37.785699" elapsed="0.000241"/>
+</kw>
+<status status="PASS" start="2026-11-15T20:57:32.771782" elapsed="5.014362"/>
 </test>
 <kw name="Run Keywords" owner="BuiltIn" type="TEARDOWN">
 <kw name="Run Keyword And Ignore Error" owner="BuiltIn">
-<kw name="Pico SPI Device Stop">
-<msg time="2026-11-13T11:36:51.525512" level="FAIL">No keyword with name 'Pico SPI Device Stop' found.</msg>
-<status status="FAIL" start="2026-11-13T11:36:51.525474" elapsed="0.000080">No keyword with name 'Pico SPI Device Stop' found.</status>
+<kw name="Pico RTC Stop" owner="logic_analyzer_lib">
+<status status="PASS" start="2026-11-15T20:57:37.787555" elapsed="0.000865"/>
 </kw>
-<arg>Pico SPI Device Stop</arg>
+<arg>Pico RTC Stop</arg>
 <doc>Runs the given keyword with the given arguments and ignores possible errorw.</doc>
-<status status="PASS" start="2026-11-13T11:36:51.524683" elapsed="0.000930"/>
+<status status="PASS" start="2026-11-15T20:57:37.787319" elapsed="0.001138"/>
 </kw>
-<kw name="Disconnect from Logic Analyzer">
-<msg time="2026-11-13T11:36:51.526118" level="FAIL">No keyword with name 'Disconnect from Logic Analyzer' found.</msg>
-<status status="FAIL" start="2026-11-13T11:36:51.526099" elapsed="0.000042">No keyword with name 'Disconnect from Logic Analyzer' found.</status>
+<kw name="Disconnect from Logic Analyzer" owner="HIL_keywords">
+<kw name="Disconnect Logic Analyzer" owner="logic_analyzer_lib">
+<status status="PASS" start="2026-11-15T20:57:37.788656" elapsed="0.004514"/>
 </kw>
-<kw name="Disconnect from DUT">
-<msg time="2026-11-13T11:36:51.526688" level="FAIL">No keyword with name 'Disconnect from DUT' found.</msg>
-<status status="FAIL" start="2026-11-13T11:36:51.526672" elapsed="0.000037">No keyword with name 'Disconnect from DUT' found.</status>
+<status status="PASS" start="2026-11-15T20:57:37.788560" elapsed="0.004674"/>
 </kw>
-<kw name="Disconnect from HIL">
-<msg time="2026-11-13T11:36:51.527265" level="FAIL">No keyword with name 'Disconnect from HIL' found.</msg>
-<status status="FAIL" start="2026-11-13T11:36:51.527249" elapsed="0.000039">No keyword with name 'Disconnect from HIL' found.</status>
+<kw name="Disconnect from DUT" owner="DUT_keywords">
+<kw name="Disconnect DUT" owner="dut_lib">
+<status status="PASS" start="2026-11-15T20:57:37.793482" elapsed="0.004440"/>
+</kw>
+<status status="PASS" start="2026-11-15T20:57:37.793360" elapsed="0.004629"/>
+</kw>
+<kw name="Disconnect from HIL" owner="HIL_keywords">
+<kw name="Disconnect HIL" owner="hil_lib">
+<msg time="2026-11-15T20:57:37.803110" level="INFO">HIL disconnected</msg>
+<doc>Disconnect HIL</doc>
+<status status="PASS" start="2026-11-15T20:57:37.798242" elapsed="0.004950"/>
+</kw>
+<status status="PASS" start="2026-11-15T20:57:37.798122" elapsed="0.005123"/>
 </kw>
 <arg>Run Keyword And Ignore Error</arg>
-<arg>Pico SPI Device Stop</arg>
+<arg>Pico RTC Stop</arg>
 <arg>AND</arg>
 <arg>Disconnect from Logic Analyzer</arg>
 <arg>AND</arg>
@@ -78,38 +301,20 @@ No keyword with name 'Connect To HIL' found.</status>
 <arg>AND</arg>
 <arg>Disconnect from HIL</arg>
 <doc>Executes all the given keywords in a sequence.</doc>
-<status status="FAIL" start="2026-11-13T11:36:51.524241" elapsed="0.003110">Several failures occurred:
-
-1) No keyword with name 'Disconnect from Logic Analyzer' found.
-
-2) No keyword with name 'Disconnect from DUT' found.
-
-3) No keyword with name 'Disconnect from HIL' found.</status>
+<status status="PASS" start="2026-11-15T20:57:37.786863" elapsed="0.016407"/>
 </kw>
-<status status="FAIL" start="2026-11-13T11:36:51.464574" elapsed="0.062840">Suite setup failed:
-No keyword with name 'Connect To HIL' found.
-
-Also suite teardown failed:
-Several failures occurred:
-
-1) No keyword with name 'Disconnect from Logic Analyzer' found.
-
-2) No keyword with name 'Disconnect from DUT' found.
-
-3) No keyword with name 'Disconnect from HIL' found.</status>
+<status status="PASS" start="2026-11-15T20:57:25.085619" elapsed="12.717680"/>
 </suite>
 <statistics>
 <total>
-<stat pass="0" fail="6" skip="0">All Tests</stat>
+<stat pass="5" fail="0" skip="0">All Tests</stat>
 </total>
 <tag>
 </tag>
 <suite>
-<stat name="Spi Device Pico" id="s1" pass="0" fail="6" skip="0">Spi Device Pico</stat>
+<stat name="Rtc Ds3231 Pico" id="s1" pass="5" fail="0" skip="0">Rtc Ds3231 Pico</stat>
 </suite>
 </statistics>
 <errors>
-<msg time="2026-11-13T11:36:51.506997" level="ERROR">Error in file 'D:\HCMUT\DA2\STM32F4_DUT_Repo_Test\hil_tests\spi_device_pico.robot' on line 11: Replacing variables from setting 'Resource' failed: Variable '${HIL_ROOT}' not found.</msg>
-<msg time="2026-11-13T11:36:51.507343" level="ERROR">Error in file 'D:\HCMUT\DA2\STM32F4_DUT_Repo_Test\hil_tests\spi_device_pico.robot' on line 12: Replacing variables from setting 'Resource' failed: Variable '${HIL_ROOT}' not found.</msg>
 </errors>
 </robot>
