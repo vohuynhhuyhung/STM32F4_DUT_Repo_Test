@@ -1053,10 +1053,13 @@ int Cmd_UART_Send_String(int argc, char *argv[])
 {
     if (argc < 3) return CMDLINE_TOO_FEW_ARGS;
 
-    for (int i = 1; i < argc; i++)
+    /* argc = tokens + 1 in this CLI: the words are argv[1] .. argv[argc - 2].
+     * argv[argc - 1] is NOT NULL but a stale pointer (leftover of a previous command). */
+    for (int i = 1; i < argc - 1; i++)
     {
+        if (i > 1)
+            UART_Send_String(" ");
         UART_Send_String(argv[i]);
-        UART_Send_String(" ");
     }
 
     UART_Send_String("\r\n");

@@ -45,10 +45,10 @@
 ../App/CMDLine/command.c:1008:5:Cmd_UART_Dump_Buffer	280	static
 ../App/CMDLine/command.c:1027:5:Cmd_UART_Receive	280	static
 ../App/CMDLine/command.c:1052:5:Cmd_UART_Send_String	24	static
-../App/CMDLine/command.c:1069:5:Cmd_ADC_Read	24	static
-../App/CMDLine/command.c:1085:5:Cmd_PWM_Freq	32	static
-../App/CMDLine/command.c:1104:5:Cmd_PWM_Duty_Cycle	24	static
-../App/CMDLine/command.c:1124:5:Cmd_PWM_Start	24	static
-../App/CMDLine/command.c:1141:5:Cmd_PWM_Stop	24	static
-../App/CMDLine/command.c:1158:5:Cmd_Set_Led	24	static
-../App/CMDLine/command.c:1224:5:Cmd_Read_Sine_Frequency	16	static
+../App/CMDLine/command.c:1072:5:Cmd_ADC_Read	24	static
+../App/CMDLine/command.c:1088:5:Cmd_PWM_Freq	32	static
+../App/CMDLine/command.c:1107:5:Cmd_PWM_Duty_Cycle	24	static
+../App/CMDLine/command.c:1127:5:Cmd_PWM_Start	24	static
+../App/CMDLine/command.c:1144:5:Cmd_PWM_Stop	24	static
+../App/CMDLine/command.c:1161:5:Cmd_Set_Led	24	static
+../App/CMDLine/command.c:1227:5:Cmd_Read_Sine_Frequency	16	static
