@@ -1,4 +1,4 @@
-*** Settings ***
+*** Settings  ***
 # The Pico emulates a 25LC020A-style SPI EEPROM (simplified: 256 bytes, 16-byte pages), the DUT is the
 # SPI3 master (mode 1). Instructions: 06 WREN, 05 RDSR (bit 0 WIP, bit 1 WEL), 03 READ <a>, 02 WRITE <a> <d..>.
 # Like the real chip: WRITE without WREN is ignored, the address wraps inside the page, WIP = 1 for 5 ms.
